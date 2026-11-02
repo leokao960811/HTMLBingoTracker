@@ -1,3 +1,6 @@
+var banks = [];   // from banks/index.json
+var cache = {};   // phrase lists already downloaded, by id
+
 // Fisher-Yates Shuffle
 var shuffle = function(array) {
   var m = array.length, t, i;
@@ -51,31 +54,63 @@ function generateClassic(){
 
 //Using DOM to avoid internet requirement
 function render(cells) {
-  var labels = document.querySelectorAll(".grid label");
-  labels.forEach(function(label, i) {
+   document.querySelectorAll(".grid label").forEach(function(label, i) {
     label.querySelector("input").checked = false;
     label.querySelector(".mark span").textContent = (i === 12) ? "FREE SPACE" : cells[i];
   });
 }
 
-function cellsFor(bank) {
-  if (bank.generate) return bank.generate();
-  return shuffle(bank.phrases.slice()).slice(0, 25);
+async function loadJSON(path) {
+  var res = await fetch(path);
+  if (!res.ok) throw new Error(path + " returned " + res.status);
+  return res.json();
 }
 
-function newCard() {
-  var bank = BANKS[document.getElementById("bank").value];
-  document.getElementById("title").textContent = bank.title;
-  render(cellsFor(bank));
+async function cellsFor(entry) {
+  if (entry.type === "classic") return generateClassic();
+  if (!cache[entry.id]) {
+    var data = await loadJSON("banks/" + entry.file);
+    if (!Array.isArray(data.phrases) || data.phrases.length < 24) {
+      throw new Error(entry.file + " needs at least 24 phrases");
+    }
+    cache[entry.id] = data.phrases;
+  }
+  var picked = shuffle(cache[entry.id].slice()).slice(0, 24);
+  picked.splice(12, 0, null);   // placeholder at the center; render() overwrites it
+  return picked;
+}
+
+function showError(err) {
+  console.error(err);
+  document.getElementById("title").textContent = "Could not load bank";
+}
+
+async function newCard() {
+  var select = document.getElementById("bank");
+  var entry = banks[select.selectedIndex];
+  var cells;
+  try {
+    cells = await cellsFor(entry);
+  } catch (err) {
+    return showError(err);
+  }
+  if (banks[select.selectedIndex] !== entry) return;   // selection changed while loading
+  document.getElementById("title").textContent = entry.title;
+  render(cells);
   document.getElementById("seed").textContent = Math.floor(Math.random() * 100000000);
 }
 
-document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener("DOMContentLoaded", async function() {
   var select = document.getElementById("bank");
-  Object.keys(BANKS).forEach(function(id) {
+  try {
+    banks = await loadJSON("banks/index.json");
+  } catch (err) {
+    return showError(err);
+  }
+  banks.forEach(function(entry) {
     var option = document.createElement("option");
-    option.value = id;
-    option.textContent = BANKS[id].title;
+    option.value = entry.id;
+    option.textContent = entry.title;
     select.appendChild(option);
   });
   select.addEventListener("change", newCard);

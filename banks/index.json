@@ -1,0 +1,5 @@
+[
+  { "id": "tf2", "title": "Team Fortress 2", "file": "tf2.json" },
+  { "id": "classic", "title": "Classic (1-75)", "type": "classic" },
+  { "id": "cos", "title": "Cosplayer's", "file": "cos.json" }
+]
