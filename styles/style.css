@@ -87,6 +87,18 @@ small {
 	 text-align: center;
 }
 
+button {
+	 display: block;
+	 margin: 0.5rem auto;
+	 padding: 0.5rem 1rem;
+	 font-size: 1rem;
+	 border: none;
+	 border-radius: 5px;
+	 background: #cf6a32;
+	 color: #2a2724;
+	 cursor: pointer;
+}
+
 @media (max-width: 600px) {
   :root { --gap: 0.25rem; }
   body { padding: 0 0.5rem 1rem; }
