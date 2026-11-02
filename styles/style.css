@@ -1,52 +1,68 @@
+:root {
+  --gap: 0.4rem;
+  --board-width: 30rem;
+}
+
 body {
 	 box-sizing: border-box;
+	 margin: 0;
+  	 padding: 0 1rem 1rem;
 	 background: #2a2724;
 	 color: #cf6a32;
 	 font-family: "Helvetica Neue", Helvetica, sans-serif;
 	 user-select: none;
+	 -webkit-tap-highlight-color: transparent;
 }
  *, *::before, *::after {
 	 box-sizing: inherit;
 }
- main {
-	 width: 33rem;
-	 margin: 33px auto;
-	 border: 3px solid #84766b;
-	 border-radius: 15px;
-	 background: transparent;
+
+h1 {
+  margin: 0;
+  padding-top: 1rem;
+  color: #ede4cc;
+  text-align: center;
 }
- h1 {
-	 padding-top: 1rem;
-	 color: #ede4cc;
-	 font-size: 2rem;
-	 text-align: center;
+#title {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-size: clamp(1.1rem, 5vw, 2rem);
 }
- h1 span {
-	 display: inline-block;
-	 width: 5.7rem;
-	 height: 5.7rem;
-	 font-size: 2.7em;
+.letters {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: var(--gap);
+  width: min(100%, var(--board-width));
+  margin: 0 auto;
+  font-size: clamp(1.6rem, 9vw, 2.7rem);
+  line-height: 1.2;
 }
- .grid {
-	 display: flex;
-	 flex-flow: row wrap;
-	 justify-content: space-around;
-	 width: 30rem;
-	 height: 30rem;
-	 margin: 0 auto;
+
+select {
+  display: block;
+  margin: 0.75rem auto;
+  font-size: 1rem;   /* under 16px makes iOS Safari zoom in on focus */
 }
- label {
+
+.grid {
+  	 display: grid;
+  	 grid-template-columns: repeat(5, 1fr);
+ 	 gap: var(--gap);
+ 	 width: min(100%, var(--board-width));
+  	 margin: 0 auto;
+}
+label {
 	 display: block;
-	 width: 5.7rem;
-	 height: 5.7rem;
+	 aspect-ratio: 1;
 	 border: 3px solid #84766b;
 	 border-radius: 15px;
 	 background: #cf6a32;
+	 touch-action: manipulation;
 }
- label input {
+label input {
 	 display: none;
 }
- label input:checked + .mark {
+label input:checked + .mark {
 	 background: transparent;
 	 color: #2a2724;
 }
@@ -54,17 +70,27 @@ body {
 	 display: flex;
 	 flex-direction: column;
 	 justify-content: center;
-	 width: 5.4rem;
-	 height: 5.4rem;
+	 width: 100%;
+  	 height: 100%;
 	 padding: 0.2rem;
 	 border-radius: 12px;
 	 background: #2a2724;
-	 font-size: 0.9em;
+	 font-size: clamp(0.55rem, 2.8vw, 0.9rem);
 	 text-align: center;
+	 overflow-wrap: anywhere;
+     hyphens: auto;
 }
- small {
+
+small {
 	 display: block;
 	 padding: 1em;
 	 text-align: center;
+}
+
+@media (max-width: 600px) {
+  :root { --gap: 0.25rem; }
+  body { padding: 0 0.5rem 1rem; }
+  label { aspect-ratio: 3 / 4; border-width: 2px; border-radius: 10px; }
+  label .mark { padding: 0.1rem; border-radius: 8px; }
 }
  
