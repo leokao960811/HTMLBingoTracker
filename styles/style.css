@@ -88,8 +88,7 @@ small {
 }
 
 button {
-	 display: block;
-	 margin: 0.5rem auto;
+	 display: block; 
 	 padding: 0.5rem 1rem;
 	 font-size: 1rem;
 	 border: none;
@@ -97,6 +96,14 @@ button {
 	 background: #cf6a32;
 	 color: #2a2724;
 	 cursor: pointer;
+}
+
+.actions {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  margin: 0.75rem 0;
 }
 
 @media (max-width: 600px) {
