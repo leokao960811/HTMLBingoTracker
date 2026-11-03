@@ -148,6 +148,12 @@ function newCard() {
   loadCard(randomSeed());
 }
 
+function resetCard() {
+  document.querySelectorAll(".grid label").forEach(function(label, i) {
+    label.querySelector("input").checked = false;
+  });
+}
+
 function updateURL(bankId, seed) {
   var params = new URLSearchParams({ bank: bankId, seed: seed });
   history.replaceState(null, "", "?" + params);
@@ -172,5 +178,7 @@ document.addEventListener("DOMContentLoaded", async function() {
   var index = banks.findIndex(function(b) { return b.id === params.get("bank"); });
   select.selectedIndex = index >= 0 ? index : 0;
   loadCard(params.get("seed") || randomSeed());
+
+  document.getElementById("reset-card").addEventListener("click", resetCard);
 });
 
