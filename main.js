@@ -1,6 +1,10 @@
 var banks = [];   // from banks/index.json
 var cache = {};   // phrase lists already downloaded, by id
 
+var THEME_KEYS = ["bg", "accent", "border", "heading"];
+var bankTheme = null;
+var userTheme = loadUserTheme();
+
 // String -> 32-bit number (xmur3 hash)
 function hashSeed(str) {
   var h = 1779033703 ^ str.length;
@@ -78,6 +82,33 @@ function shuffle(array, rand) {
 //   $("#seed").text(Math.floor(Math.random() * 100000000)); // TODO
 // });
 
+function loadUserTheme() {
+  try { return JSON.parse(localStorage.getItem("bingo-theme")) || {}; }
+  catch (e) { return {}; }
+}
+
+function saveUserTheme() {
+  try { localStorage.setItem("bingo-theme", JSON.stringify(userTheme)); }
+  catch (e) { /* storage blocked: colors just won't persist */ }
+}
+
+function applyTheme() {
+  var root = document.documentElement;
+  THEME_KEYS.forEach(function(key) {
+    var value = userTheme[key] || (bankTheme && bankTheme[key]);
+    if (value) root.style.setProperty("--" + key, value);
+    else root.style.removeProperty("--" + key);
+  });
+  syncPickers();
+}
+
+function syncPickers() {
+  var style = getComputedStyle(document.documentElement);
+  document.querySelectorAll("[data-key]").forEach(function(input) {
+    input.value = style.getPropertyValue("--" + input.dataset.key).trim();
+  });
+}
+
 function generatePhrases(pool) {
   return shuffle(pool.slice()).slice(0, 25);
 }
@@ -138,6 +169,8 @@ async function loadCard(seed) {
     return showError(err);
   }
   if (ticket !== latest) return;   // a newer request superseded this one
+  bankTheme = entry.theme || null;
+  applyTheme();
   document.getElementById("title").textContent = entry.title;
   render(cells);
   document.getElementById("seed").textContent = seed;
@@ -161,18 +194,35 @@ function updateURL(bankId, seed) {
 
 document.addEventListener("DOMContentLoaded", async function() {
   var select = document.getElementById("bank");
+  applyTheme();   // user colors appear immediately, before the manifest loads
+  document.querySelectorAll("[data-key]").forEach(function(input) {
+    input.addEventListener("input", function() {
+      userTheme[input.dataset.key] = input.value;
+      saveUserTheme();
+      applyTheme();
+    });
+  });
+
+  document.getElementById("reset-colors").addEventListener("click", function() {
+    userTheme = {};
+    saveUserTheme();
+    applyTheme();
+  });
+
   document.getElementById("new-card").addEventListener("click", newCard);
   try {
     banks = await loadJSON("banks/index.json");
   } catch (err) {
     return showError(err);
   }
+
   banks.forEach(function(entry) {
     var option = document.createElement("option");
     option.value = entry.id;
     option.textContent = entry.title;
     select.appendChild(option);
   });
+  
   select.addEventListener("change", newCard);
   var params = new URLSearchParams(location.search);
   var index = banks.findIndex(function(b) { return b.id === params.get("bank"); });
