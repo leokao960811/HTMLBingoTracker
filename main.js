@@ -95,7 +95,8 @@ function saveUserTheme() {
 function applyTheme() {
   var root = document.documentElement;
   THEME_KEYS.forEach(function(key) {
-    var value = userTheme[key] || (bankTheme && bankTheme[key]);
+    var user = userTheme[key];
+    var value = /^#[0-9a-f]{6}$/i.test(user) ? user : (bankTheme && bankTheme[key]);
     if (value) root.style.setProperty("--" + key, value);
     else root.style.removeProperty("--" + key);
   });
@@ -157,7 +158,7 @@ function showError(err) {
 }
 
 var latest = 0;
-async function loadCard(seed) {
+async function loadCard(seed, resetColors) {
   seed = String(seed).trim().toLowerCase();
   var select = document.getElementById("bank");
   var entry = banks[select.selectedIndex];
@@ -170,11 +171,20 @@ async function loadCard(seed) {
   }
   if (ticket !== latest) return;   // a newer request superseded this one
   bankTheme = entry.theme || null;
+  if (resetColors) { 
+    userTheme = {}; 
+    saveUserTheme(); 
+  }
+  
   applyTheme();
   document.getElementById("title").textContent = entry.title;
   render(cells);
   document.getElementById("seed").textContent = seed;
   updateURL(entry.id, seed);
+}
+
+function onBankChange() {
+  loadCard(randomSeed(), true);
 }
 
 function newCard() {
@@ -223,7 +233,7 @@ document.addEventListener("DOMContentLoaded", async function() {
     select.appendChild(option);
   });
   
-  select.addEventListener("change", newCard);
+  select.addEventListener("change", onBankChange);
   var params = new URLSearchParams(location.search);
   var index = banks.findIndex(function(b) { return b.id === params.get("bank"); });
   select.selectedIndex = index >= 0 ? index : 0;
